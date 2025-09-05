@@ -100440,11 +100440,11 @@ exports.DotnetCoreInstaller = exports.DotnetInstallDir = exports.DotnetInstallSc
 // Load tempDirectory before it gets wiped by tool-cache
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const io = __importStar(__nccwpck_require__(7436));
 const hc = __importStar(__nccwpck_require__(6255));
+const io = __importStar(__nccwpck_require__(7436));
 const fs_1 = __nccwpck_require__(7147);
-const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
+const path_1 = __importDefault(__nccwpck_require__(1017));
 const semver_1 = __importDefault(__nccwpck_require__(1383));
 const utils_1 = __nccwpck_require__(1314);
 const QUALITY_INPUT_MINIMAL_MAJOR_TAG = 6;
@@ -100643,25 +100643,6 @@ class DotnetCoreInstaller {
     async installDotnet() {
         const versionResolver = new DotnetVersionResolver(this.version);
         const dotnetVersion = await versionResolver.createDotnetVersion();
-        /**
-         * Install dotnet runitme first in order to get
-         * the latest stable version of dotnet CLI
-         */
-        const runtimeInstallOutput = await new DotnetInstallScript()
-            // If dotnet CLI is already installed - avoid overwriting it
-            .useArguments(utils_1.IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files')
-            // Install only runtime + CLI
-            .useArguments(utils_1.IS_WINDOWS ? '-Runtime' : '--runtime', 'dotnet')
-            // Use latest stable version
-            .useArguments(utils_1.IS_WINDOWS ? '-Channel' : '--channel', 'LTS')
-            .execute();
-        if (runtimeInstallOutput.exitCode) {
-            /**
-             * dotnetInstallScript will install CLI and runtime even if previous script haven't succeded,
-             * so at this point it's too early to throw an error
-             */
-            core.warning(`Failed to install dotnet runtime + cli, exit code: ${runtimeInstallOutput.exitCode}. ${runtimeInstallOutput.stderr}`);
-        }
         /**
          * Install dotnet over the latest version of
          * dotnet CLI
