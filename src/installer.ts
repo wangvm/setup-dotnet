@@ -1,14 +1,14 @@
 // Load tempDirectory before it gets wiped by tool-cache
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as io from '@actions/io';
 import * as hc from '@actions/http-client';
+import * as io from '@actions/io';
 import {chmodSync} from 'fs';
-import path from 'path';
 import os from 'os';
+import path from 'path';
 import semver from 'semver';
-import {IS_WINDOWS, PLATFORM} from './utils';
 import {QualityOptions} from './setup-dotnet';
+import {IS_WINDOWS, PLATFORM} from './utils';
 
 export interface DotnetVersion {
   type: string;
@@ -263,31 +263,6 @@ export class DotnetCoreInstaller {
   public async installDotnet(): Promise<string | null> {
     const versionResolver = new DotnetVersionResolver(this.version);
     const dotnetVersion = await versionResolver.createDotnetVersion();
-
-    /**
-     * Install dotnet runitme first in order to get
-     * the latest stable version of dotnet CLI
-     */
-    const runtimeInstallOutput = await new DotnetInstallScript()
-      // If dotnet CLI is already installed - avoid overwriting it
-      .useArguments(
-        IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files'
-      )
-      // Install only runtime + CLI
-      .useArguments(IS_WINDOWS ? '-Runtime' : '--runtime', 'dotnet')
-      // Use latest stable version
-      .useArguments(IS_WINDOWS ? '-Channel' : '--channel', 'LTS')
-      .execute();
-
-    if (runtimeInstallOutput.exitCode) {
-      /**
-       * dotnetInstallScript will install CLI and runtime even if previous script haven't succeded,
-       * so at this point it's too early to throw an error
-       */
-      core.warning(
-        `Failed to install dotnet runtime + cli, exit code: ${runtimeInstallOutput.exitCode}. ${runtimeInstallOutput.stderr}`
-      );
-    }
 
     /**
      * Install dotnet over the latest version of
