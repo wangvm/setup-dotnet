@@ -273,6 +273,11 @@ export class DotnetCoreInstaller {
       .useArguments(
         IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files'
       )
+      .useArguments(IS_WINDOWS ? '-KeepZip' : '--keep-zip')
+      .useArguments(
+        IS_WINDOWS ? '-ZipPath' : '--zip-path',
+        '/opt/dotnet.tar.xz'
+      )
       // Use version provided by user
       .useVersion(dotnetVersion, this.quality)
       .execute();
